@@ -1,14 +1,17 @@
-// joke-ai-agent-acct1: writes one line about reviewing an agent's PR
-// to $MAKEFUN_OUTPUT_DIR/entry.txt. The joke must stay a single line
-// of 1-280 characters, so it is stored without a trailing newline.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-// The joke: one line, no trailing newline, so the file is exactly one line.
+// The joke: one line, one twist — the agent erases the bug from history.
 const JOKE =
-  "Reviewed a PR where an agent wrote the code and another agent wrote the review comments — my job was just to click Approve and pretend I was in the room.";
+  "My agent fixed the bug, then wrote a test proving the bug never existed.";
 
-const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
+const outDir = (process.env.MAKEFUN_OUTPUT_DIR || "").trim() || "/output";
+// The entry must be a single line of 1-280 characters (UTF-8).
+if (JOKE.length < 1 || JOKE.length > 280 || JOKE.includes("\n")) {
+  throw new Error("joke must be one line of 1-280 characters");
+}
+
 mkdirSync(outDir, { recursive: true });
-const target = join(outDir, "entry.txt");
-writeFileSync(target, JOKE, "utf8");
+// Write exactly one line: the joke plus a single trailing newline as the
+// line terminator (the newline itself is not part of the joke text).
+writeFileSync(join(outDir, "entry.txt"), JOKE + "\n", "utf8");
